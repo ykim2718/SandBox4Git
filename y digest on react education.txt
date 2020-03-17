@@ -1,0 +1,119 @@
+﻿
+<Transpiler (ES6 to ES5)>
+1) On-line tool: http://babeljs.io/repl
+2) Off-line plug-in to Visual studio:
+  - install
+	npm install --global babel-cli  babel-preset-env babel-preset-stage-2
+  - create .babelrc at Visual studio
+      {
+    "presets" : [ "env", "stage-2" ]    
+	}
+
+
+<Debugging>
+
+install source-map
+	>> npm install babel-plugin-source-map-support --save-dev
+create debugginginformation using source-map
+	>> babel  src/test1.js  –o  build/test1.js --source-maps
+	>> babel  src  –d  build  --source-maps
+
+
+<Webpack>
+
+install webpack
+	>> npm install webpack webpack-cli -g
+
+create directory
+	>> mkdir <folder>
+	>> cd <folder>
+	>> npm init
+	>> npm install --save-dev webpack webpack-cli
+	
+install live server
+	>> npm install -g live-server
+
+install webpack-dev-server
+	>> npm install webpack-dev-server  --save-dev
+	>> npm install webpack-dev-server  --g
+        >> edit webpack.config.js inserting devServer information
+	 devServer : {
+        	contentBase : './public',
+	        inline:true, 
+        	historyApiFallback :true,
+	        port : 7777
+	    }
+
+- 4 operations:
+	. entry
+	. output
+	. loader (module)
+	. plugin
+
+
+<JSX>
+- Javascript syntax: 1) kebox to camel casing, 2) class to className
+- One root element
+- Only expression using curl braces {}, not statement
+- Style
+   1) import '..'
+   2) inline style: Javascript object
+   3) styled-components to use CSS style
+     * React native 는 CSS 만 써야 하기에 styled-components를 꼭 사용해야 됨
+
+<Component>
+- Stateful component Vs Stateless component
+- presentation component Vs container component
+
+<State Vs Props>
+- State는 변경가능한데 소유한 component에서 setState method를 통해 가능
+- setState는 change value, notification, and rendering 함. 비동기 동작임.
+- Props 는 부모에서 자식으로 전달되는데 자식에서 직접 변경불가 (객체를 전달하면 가능)
+  부모 state를 변경하려면 부모에서 전달된 부모 callback 함수를 사용해야 함.
+- State 보관은 부모 component나 주요 component에서 집중하는 것이 좋음.
+- State 객체가 복잡하면 불변성 library를 사용하는 것이 좋음: immer
+- React의 최대 장점은 fast rendering인데 불변성 관리 최적화를 꼭 해야 됨 (?)
+- State는 관리가 필요한 중요한 데이타인데 중요함의 기준은  >>y> controlled data
+   1) 여러 component에서 사용하는 data이거나,  >>y> sharing data
+   2) 추적이 필요한 data  >>y> tracking data
+  임.
+
+
+<Unique Key generation>
+1) UUID   : npm uuid
+2) ShortID (8 byte): npm shortid
+3) ObjectID (12 byte, used in MongoDB): npm install objectid
+    12 = 4 (timestamp) + 3 (computer ip) + 2 (process id) + 3 (Incremental number)
+
+<배포>
+
+- source-map 은 배포하지 않도록 한다
+- react 개발자 도구를 비활성화해야 한다: component tree 구조를 보지 못하도록 한다.
+- npm rimraf는 파일을 remove하는 기능을 제공합니다
+yarn add -D rimraf cpy-cil
+그 후 package.json 에
+  scripts: {
+  "build:nomap": "react-scripts build && rimraf build/**/*.map && rimraf d:/www/* && cpy ** d:/www/ --cwd=build --parents",
+}
+
+build후 build 디렉토리 아래에서 map을 삭제하는것입니다.
+
+* react developer tools의 비활성화
+
+아래 문서를 참조하세요.
+https://github.com/fvilers/disable-react-devtools#readme
+
+
+강사 배포 문서 참고할것 !!!!!!!!!!
+
+
+
+
+
+
+
+
+
+
+
+
