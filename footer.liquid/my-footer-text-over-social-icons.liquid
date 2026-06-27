@@ -1,0 +1,37 @@
+{% comment %}
+  (copyLeft) yRocket, Version 0.0.2026.4.2 (since 0.0.2026.4.2)
+  Usage:
+    sections/footer.liquid 에서 렌더링 코드 삽입
+       변경전
+          {%- if shop.features.follow_on_shop? and section.settings.enable_follow_on_shop -%}
+            <div class="footer__follow-on-shop">
+              {{ shop | login_button: action: 'follow' }}
+            </div>
+          {%- endif -%}
+
+          {%- if section.settings.show_social and has_social_icons -%}
+            {%- render 'social-icons', class: 'footer__list-social' -%}
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endunless -%}
+  {%- endif -%}
+       변경후
+          {%- if section.settings.show_social and has_social_icons -%}
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">    ← 여기 삽입
+              {%- render 'my-footer-text-over-social-icons' -%}     ← 여기 삽입
+              {%- render 'social-icons', class: 'footer__list-social' -%}
+            </div>    ← 여기 삽입
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endunless -%}
+  {%- endif -%}
+{% endcomment %}
+
+
+
+<div style="color: rgba(var(--color-foreground), 0.75); font-size: 1.5rem; white-space: nowrap;">
+    Anderson Mill, Austin, Texas, USA
+</div>
+
