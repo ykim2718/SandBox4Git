@@ -1,0 +1,112 @@
+{% comment %}
+  (copyLeft) yRocket, Version 0.3.2026.3.29 (since 0.0.2026.3.28)
+  Discount Badge Snippet
+  Required: product
+  Usage:
+    1) product price에서 compare-at price 입력
+    2) snippets/card-product.liquid 수정
+        if card_product.featured_media
+        <div class="card__media ...">
+          render 'my-discount-badge-on-image', product: card_product  ← 여기 삽입
+          <div class="media media--transparent media--hover-effect">
+          <img srcset="...
+  Note: compare-at-price를 사용하면 제품화면의 왼쪽하단에 sale badge가 뜸.
+      이를 없애기 위해서 아래를 수정해야 함.
+    1) 첫 번째 (card__inner 안쪽)
+        elsif card_product.compare_at_price > card_product.price and card_product.available
+        <span id="NoMediaStandardBadge-{{ section_id }}-{{ card_product.id }}"
+         class="badge badge--bottom-left color-{{ settings.sale_badge_color_scheme }}"
+         style="display:none;"  ← 여기 추가
+         >
+          {{- 'products.product.on_sale' | t -}}
+        </span>
+    2) 두 번째 (card__content 안쪽)
+        elsif card_product.compare_at_price > card_product.price and card_product.available
+        <span id="Badge-{{ section_id }}-{{ card_product.id }}"
+         class="badge badge--bottom-left color-{{ settings.sale_badge_color_scheme }}"
+         style="display:none;"  ← 여기 추가
+         >
+          {{- 'products.product.on_sale' | t -}}
+        </span>
+{% endcomment %}
+
+{% assign var = product.selected_or_first_available_variant %}
+{% assign original_value = var.compare_at_price %}
+{% assign current_value = var.price %}
+
+{% if original_value > 0 and current_value < original_value %}
+  {% assign discount_pct = original_value | minus: current_value | times: 100 | divided_by: original_value | round %}
+  {% if discount_pct > 1 %}
+    <script>
+      if (!document.getElementById('discount-badge-style')) {
+        const style = document.createElement('style');
+        style.id = 'discount-badge-style';
+        style.textContent = `
+          .discount-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 9999;
+            background: #E53E3E;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1;
+            padding: 5px 7px;
+            border-radius: 7px;
+            letter-spacing: 0.04em;
+            pointer-events: none;
+            user-select: none;
+            
+          }
+
+          @keyframes badge-small-wiggle {
+            0%   { transform: translate(0, 0) rotate(0deg); }
+            25%  { transform: translate(-1.5px, 1px) rotate(-4deg); }
+            50%  { transform: translate(1.5px, -1px) rotate(4deg); }
+            75%  { transform: translate(-1px, -1.5px) rotate(-2deg); }
+            100% { transform: translate(1px, 1.5px) rotate(2deg); }
+          }
+
+          .discount-badge--small-wiggle {
+            animation: badge-small-wiggle 1.2s ease-in-out infinite alternate;
+          }
+
+          @keyframes badge-big-wiggle {
+            0%   { transform: translate(0, 0) rotate(0deg) scale(0.9); }
+            20%  { transform: translate(-3px, 2px) rotate(-7deg) scale(1.0); }
+            40%  { transform: translate(3px, -2px) rotate(7deg) scale(1.1); }
+            60%  { transform: translate(-2px, -3px) rotate(-3deg) scale(1.0); }
+            80%  { transform: translate(2px, 3px) rotate(3deg) scale(1.0); }
+            100% { transform: translate(0, 0) rotate(0deg) scale(0.9); }
+          }
+
+          .discount-badge--big-wiggle {
+            animation: badge-big-wiggle 1.7s ease-in-out infinite;
+            background: #C0392B;
+            font-size: 13px;
+            padding: 6px 9px;
+            box-shadow: 0 0 8px rgba(192, 57, 43, 0.6);
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            .discount-badge--small-wiggle,
+            .discount-badge--big-wiggle {
+              animation: none;
+            }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    </script>
+
+    {% if discount_pct >= 50 %}
+      <div class="discount-badge discount-badge--big-wiggle">{{ discount_pct }}% OFF</div>
+    {% elsif discount_pct >= 20 %}
+      <div class="discount-badge discount-badge--small-wiggle">{{ discount_pct }}% OFF</div>
+    {% else %}
+      <div class="discount-badge">{{ discount_pct }}% OFF</div>
+    {% endif %}
+
+  {% endif %}
+{% endif %}

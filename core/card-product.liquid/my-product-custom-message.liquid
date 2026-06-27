@@ -1,0 +1,31 @@
+{%- comment -%}
+  (copyLeft) yRocket, Version 0.0.2026.3.30 (since 0.0.2026.3.30)
+  Usage:
+    Snippets/card-product.liquid 에서 한 줄 추가
+        {% render 'price', product: card_product, price_class: '', show_compare_at_price: true %}
+        {% render 'my-product-custom-message', card_product: card_product, collection_title: 'Featured Collection' %}   ← 여기 삽입
+        {%- if card_product.quantity_price_breaks_configured? -%}
+        ..
+{%- endcomment -%}
+
+{%- if section.settings.title == collection_title -%}
+  {%- assign is_in_collection = false -%}
+  
+  {%- for col in card_product.collections -%}
+    {%- if col.title == collection_title -%}
+      {%- assign is_in_collection = true -%}
+      {%- break -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- if is_in_collection and card_product.metafields.custom.product_message != blank -%}
+    <div class="product-custom-meta-message" 
+         style="margin-top: 6px; 
+                color: #FF6600; 
+                font-size: 13px; 
+                font-weight: 500; 
+                letter-spacing: -0.2px;">
+      {{ card_product.metafields.custom.product_message }}
+    </div>
+  {%- endif -%}
+{%- endif -%}

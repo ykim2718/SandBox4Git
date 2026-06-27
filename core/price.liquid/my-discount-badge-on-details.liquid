@@ -1,0 +1,33 @@
+{% comment %}
+  (copyLeft) yRocket, Version 0.0.2026.3.28 (since 0.0.2026.3.28)
+  Discount Badge Snippet - Product Detail Page
+  Required: product
+  Usage:
+    1) my-discount-badge-on-details-js.liquid 필요
+    2) snippets/price.liquid 에서 on_sale badge 대체
+      {_% if show_badges -%_}
+        <span class="badge price__badge-sale color-{{ settings.sale_badge_color_scheme }}"
+         style="display:none;"     ← 여기 삽입
+        >
+          {{ 'products.product.on_sale' | t }}
+        </span>
+        {_% render 'my-discount-badge-on-details', product: product %_}     ← 여기 삽입
+        <span class="badge price__badge-sold-out color-{{ settings.sold_out_badge_color_scheme }}">
+          {{ 'products.product.sold_out' | t }}
+        </span>
+      {_%- endif -%_}
+    3) sections/main-product.liquid 에서
+      </product-info>
+      {_% render 'my-discount-badge-on-details-js', product: product %_}     ← 여기 삽입
+      {_% schema %_}
+      ...
+{% endcomment %}
+
+{% assign var = product.selected_or_first_available_variant %}
+
+{% if var.compare_at_price > var.price %}
+  {% assign badge_pct = var.compare_at_price | minus: var.price | times: 100 | divided_by: var.compare_at_price | round %}
+  {% if badge_pct > 1 %}
+    <span id="discount-label-pct" class="discount-label">{{ badge_pct }}% OFF</span>
+  {% endif %}
+{% endif %}
