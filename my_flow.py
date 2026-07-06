@@ -9,9 +9,9 @@ Prefect run log + MLflow, so `python my_flow.py --data_folder <dir>` walks the
 whole prepare -> featurize -> train -> validate / test path end to end.
 
 Run by pipeline.py (orchestrator, prefect.md §4.3):
-    python my_flow.py --git_repo <r> --git_commit_hash <c> --submitter <m> --data_folder <dir>
+    python my_flow.py --submitter <m> --data_folder <dir>
 """
-__version__ = "0.0.14"
+__version__ = "0.0.15"
 
 import argparse
 from pathlib import Path
@@ -115,15 +115,14 @@ def publish_artifacts(state: State, stage: Stages = "") -> str:
     return f"publish_artifacts.{stage}"
 
 
-@flow(name="my_flow", flow_run_name="{submitter}@{git_commit_hash}", log_prints=True)
-def my_flow(*, submitter: str = "local", data_folder: str = "./data", git_commit_hash: str = "dryrun",
-            git_repo: str = "") -> State:
+@flow(name="my_flow", flow_run_name="{submitter}", log_prints=True)
+def my_flow(*, submitter: str = "local", data_folder: str = "./data") -> State:
     log = get_run_logger()
-    log.info(f"dry run: submitter={submitter} commit={git_commit_hash} "
+    log.info(f"dry run: submitter={submitter} "
              f"data={data_folder} prepare={prepare_json} optuna={optuna_json}")
 
     reports = []
-    with mlflow.start_run(run_name=f"{submitter}@{git_commit_hash}"):  # real run -> MLflow server
+    with mlflow.start_run(run_name=f"{submitter}"):  # real run -> MLflow server
         s = train_prepare({}, data_folder, prepare_json)           # train branch
         s = train_featurize(s)
         s = train(s, optuna_json)
@@ -149,12 +148,9 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
     p.add_argument("--submitter", default="local")
     p.add_argument("--data_folder", default="./data")
-    p.add_argument("--git_commit_hash", default="dryrun")
-    p.add_argument("--git_repo", default="")                   # accepted for completeness; unused here
     return p.parse_args()
 
 
 if __name__ == "__main__":
     a = parse_args()
-    my_flow(submitter=a.submitter, data_folder=a.data_folder,
-            git_commit_hash=a.git_commit_hash, git_repo=a.git_repo)
+    my_flow(submitter=a.submitter, data_folder=a.data_folder)
