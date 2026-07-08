@@ -14,9 +14,10 @@ Run by pipeline.py (orchestrator, prefect.md §4.3):
 Local debugging — run ephemerally with no Prefect server (MLflow tracking also skipped):
     python my_flow.py --run-on local --data_folder <dir>
 """
-__version__ = "0.0.18"
+__version__ = "0.0.19"
 
 import argparse
+import os
 from pathlib import Path
 from typing import Any, Dict, Literal
 
@@ -125,7 +126,12 @@ def my_flow(*, submitter: str = "local", data_folder: str = "./data") -> State:
              f"data={data_folder} prepare={prepare_json} optuna={optuna_json}")
 
     reports = []
-    with mlflow.start_run(run_name=f"{submitter}"):  # real run -> MLflow server
+    # point MLflow at the tracking server, else it logs to a local ./mlruns and never
+    # reaches the dashboard. container: service name http://mlflow:5000; host: set
+    # MLFLOW_TRACKING_URI (e.g. http://localhost:5000). --run-on local -> no-op shim.
+    mlflow.set_tracking_uri(os.environ.get("MLFLOW_TRACKING_URI", "http://mlflow:5000"))
+    mlflow.set_experiment("dry_run")                 # named experiment (else lands in "Default")
+    with mlflow.start_run(run_name=f"{submitter}"):  # -> experiment "dry_run" on the MLflow server
         s = train_prepare({}, data_folder, prepare_json)           # train branch
         s = train_featurize(s)
         s = train(s, optuna_json)
