@@ -10,8 +10,11 @@ whole prepare -> featurize -> train -> validate / test path end to end.
 
 Run by pipeline.py (orchestrator, prefect.md §4.3):
     python my_flow.py --submitter <m> --data_folder <dir>
+
+Local debugging — run ephemerally with no Prefect server (MLflow tracking also skipped):
+    python my_flow.py --run-on local --data_folder <dir>
 """
-__version__ = "0.0.15"
+__version__ = "0.0.18"
 
 import argparse
 from pathlib import Path
@@ -148,9 +151,33 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
     p.add_argument("--submitter", default="local")
     p.add_argument("--data_folder", default="./data")
+    # optional (default server) so pipeline.py's pool call (no --run-on) is unaffected;
+    # pass --run-on local for standalone debugging with no Prefect server.
+    p.add_argument("--run-on", choices=["local", "server"], default="server",
+                   help="local: run ephemerally with no server (local debugging); "
+                        "server: record the run on the Prefect server (PREFECT_API_URL)")
     return p.parse_args()
+
+
+class _NoOpMLflow:
+    """No-op MLflow stand-in for --run-on local: skips all tracking calls.
+    start_run() returns a null context; log_metric / log_param / ... become no-ops."""
+    def start_run(self, *args, **kwargs):
+        from contextlib import nullcontext
+        return nullcontext()
+
+    def __getattr__(self, _name):
+        return lambda *args, **kwargs: None
 
 
 if __name__ == "__main__":
     a = parse_args()
-    my_flow(submitter=a.submitter, data_folder=a.data_folder)
+    if a.run_on == "local":                                 # local debug: no Prefect server, no MLflow
+        import logging
+        logging.getLogger("prefect._internal.concurrency").setLevel(logging.CRITICAL)  # mute ephemeral EventsWorker noise
+        mlflow = _NoOpMLflow()                              # rebind module global -> every mlflow.* call is a no-op
+        from prefect.settings import PREFECT_API_URL, temporary_settings
+        with temporary_settings({PREFECT_API_URL: ""}):     # disable PREFECT_API_URL -> ephemeral run
+            my_flow(submitter=a.submitter, data_folder=a.data_folder)
+    else:                                                   # use the configured Prefect + MLflow servers
+        my_flow(submitter=a.submitter, data_folder=a.data_folder)
