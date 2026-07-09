@@ -14,7 +14,7 @@ Run by pipeline.py (orchestrator, prefect.md §4.3):
 Local debugging — run ephemerally with no Prefect server (MLflow tracking also skipped):
     python my_flow.py --run-on local --data_folder <dir>
 """
-__version__ = "0.0.19"
+__version__ = "0.0.20"
 
 import argparse
 import os
@@ -68,11 +68,33 @@ def train_featurize(state: State) -> State:
     return {**state, "train_featurize": "ok"}
 
 
+def _optuna_demo() -> None:
+    """Tiny Optuna study (dry run): minimize (x-2)^2 over 5 trials. Uses the shared postgres study
+    via POSTGRESQL_OPTUNA_DSN (bridged by pipeline.py); in-memory when that env is absent (e.g.
+    --run-on local). Best-effort - skipped if optuna isn't installed."""
+    log = get_run_logger()
+    try:
+        import optuna
+    except Exception as e:                                           # optuna not in the image -> skip
+        log.warning(f"optuna skipped (not installed): {e}")
+        return
+    optuna.logging.set_verbosity(optuna.logging.WARNING)
+    storage = os.environ.get("POSTGRESQL_OPTUNA_DSN") or None        # shared postgres study, else in-memory
+    study = optuna.create_study(direction="minimize", storage=storage,
+                                study_name="dry_run", load_if_exists=bool(storage))
+    study.optimize(lambda t: (t.suggest_float("x", -10, 10) - 2) ** 2, n_trials=5)
+    log.info(f"optuna best: x={study.best_params['x']:.3f} value={study.best_value:.4f} "
+             f"(storage={'postgres' if storage else 'in-memory'})")
+    mlflow.log_metric("optuna_best_value", float(study.best_value))  # active MLflow run set in the flow
+    mlflow.log_param("optuna_best_x", float(study.best_params["x"]))
+
+
 @task(task_run_name="train", retries=2, retry_delay_seconds=5)
 def train(state: State, optuna_json: Dict[str, Any]) -> State:
     log = get_run_logger()
     log.info(f"train: optuna_json = {optuna_json}")                  # Prefect run log
     mlflow.log_param("train.optuna_json", optuna_json)               # MLflow (config visible in the run)
+    _optuna_demo()                                                   # tiny Optuna HPO demo (best-effort)
     return {**state, "train": "ok"}
 
 
