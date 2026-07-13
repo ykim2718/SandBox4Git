@@ -1,0 +1,5 @@
+# dataset CSV (download from Kaggle, or: catalog.py download electric_power_consumption)
+data/
+# run artifacts (model, parquet, predictions)
+work/
+__pycache__/
