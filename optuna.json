@@ -1,0 +1,28 @@
+{
+  "__version__": "0.0.2",
+
+  "environment": {
+    "n_trials": 20,
+    "direction": "minimize",
+    "metric": "rmse",
+    "cv_folds": 5,
+    "target_zone": "Zone1",
+    "random_state": 42,
+    "storage": null,
+    "mlflow_uri": null,
+    "study_name": "epc_power",
+    "lgbm_fixed": {"objective": "regression", "metric": "rmse", "verbosity": -1, "n_jobs": -1}
+  },
+
+  "search_space": {
+    "n_estimators":      {"type": "int",   "range": [200, 1200],  "step": 100, "init": 500},
+    "learning_rate":     {"type": "float", "range": [0.01, 0.2],  "log": true, "init": 0.05},
+    "num_leaves":        {"type": "int",   "range": [15, 255],    "init": 63},
+    "max_depth":         {"type": "int",   "range": [3, 12],      "init": 6},
+    "min_child_samples": {"type": "int",   "range": [5, 80],      "init": 20},
+    "subsample":         {"type": "float", "range": [0.6, 1.0],   "init": 0.8},
+    "colsample_bytree":  {"type": "float", "range": [0.6, 1.0],   "init": 0.8},
+    "reg_alpha":         {"type": "float", "range": [1e-3, 10.0], "log": true, "init": 0.1},
+    "reg_lambda":        {"type": "float", "range": [1e-3, 10.0], "log": true, "init": 0.1}
+  }
+}

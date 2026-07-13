@@ -1,0 +1,27 @@
+{
+  "dataset_id": "electric_power_consumption",
+  "version": "v0",
+  "path": "Kaggle_EPC/data/powerconsumption.csv",
+  "bucket": "datasets",
+  "created_by": "ykim",
+  "description": "Tetouan city electric power consumption - 10-min weather inputs + 3-zone power, full year 2017 (Kaggle, fedesoriano)",
+  "metadata": {
+    "source": "kaggle",
+    "source_url": "https://www.kaggle.com/datasets/fedesoriano/electric-power-consumption",
+    "provenance": "UCI ML Repository id 849 - Power consumption of Tetouan city (Morocco)",
+    "reference": "Salam & El Hibaoui (2018), Comparison of Machine Learning Algorithms for the Power Consumption Prediction",
+    "license": "CC BY 4.0",
+    "domain": "energy",
+    "task": "regression",
+    "file": "powerconsumption.csv",
+    "format": "csv",
+    "rows": "52416",
+    "columns": "9",
+    "nulls": "0",
+    "interval": "10min",
+    "period_start": "2017-01-01T00:00:00",
+    "period_end": "2017-12-30T23:50:00",
+    "features": "Temperature, Humidity, WindSpeed, GeneralDiffuseFlows, DiffuseFlows",
+    "targets": "PowerConsumption_Zone1, PowerConsumption_Zone2, PowerConsumption_Zone3"
+  }
+}

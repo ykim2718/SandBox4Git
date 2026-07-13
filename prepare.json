@@ -1,0 +1,7 @@
+{
+  "__version__": "0.0.0",
+
+  "sample_rows": null,
+  "test_fraction": 0.2,
+  "val_fraction": 0.2
+}
