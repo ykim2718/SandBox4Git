@@ -21,7 +21,7 @@ Run by pipeline.py (orchestrator) when the run's payload = experiment_1/other_fl
 Local debugging — run ephemerally with no Prefect server (MLflow tracking also skipped):
     python other_flow.py --run-on local --data_folder <dir>
 """
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 import argparse
 import os
@@ -213,6 +213,6 @@ if __name__ == "__main__":
         mlflow = _NoOpMLflow()                              # rebind module global -> every mlflow.* call is a no-op
         from prefect.settings import PREFECT_API_URL, temporary_settings
         with temporary_settings({PREFECT_API_URL: ""}):     # disable PREFECT_API_URL -> ephemeral run
-            my_flow(submitter=a.submitter, data_folder=a.data_folder)
+            experimental_flow(submitter=a.submitter, data_folder=a.data_folder)
     else:                                                   # use the configured Prefect + MLflow servers
-        my_flow(submitter=a.submitter, data_folder=a.data_folder)
+        experimental_flow(submitter=a.submitter, data_folder=a.data_folder)
